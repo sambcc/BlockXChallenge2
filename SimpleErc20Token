@@ -1,17 +1,53 @@
-pragma solidity ^0.6.2;
+pragma solidity ^0.8.0;
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol';
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+contract tokenTimeBound is ERC20{
+    
+    using SafeMath for uint256;
+    address public owner;
+    
+    
+    modifier onlyOwner(){
+        require(msg.sender == owner,"Permission Denied: Only owner can access this resource");
+        _;
+    }
+    
+    uint256 public cap;
+    
+    uint256 releaseTime;
+    
+    constructor() 
+    ERC20("Rocket","RKT")
+    public{
+        owner = msg.sender;
+        //_setupDecimals(5);
+        
+        //10000
+        uint initialSupply = 10000 * (10 ** uint256(decimals())); 
+        
+        //cap 
+        cap=initialSupply.mul(2);
+        
+        _mint(owner,initialSupply);
+    }
 
 
-contract SimpleToken is ERC20 {
-    /**
-     * @dev Constructor that gives msg.sender all of existing tokens.
-     */
-    constructor(
-        string memory name,
-        string memory symbol,
-        uint256 initialSupply
-    ) public ERC20(name, symbol) {
-        _mint(msg.sender, initialSupply);
+    function setReleaseTime (uint256 time) onlyOwner public {
+        releaseTime = time;
+    }
+    
+     
+      function mintNewTokens(address account, uint256 amount) public onlyOwner returns(uint256){
+        require(amount > 0,"BCC1: Invalid Amount. Minted amount should be greater than 0");
+        require(totalSupply().add(amount) <= cap, "Amount exceeds capped supply");
+       _mint(account,amount);
+        
+    }
+    
+  
+    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+        require(releaseTime <  block.timestamp, "Transaction is Locked. Please try again" ); 
+        ERC20.transfer(recipient,amount);
     }
 }
