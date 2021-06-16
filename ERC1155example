@@ -1,0 +1,19 @@
+pragma solidity ^0.8.0;
+
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/ERC1155.sol";
+
+contract Chocolates is ERC1155 {
+    uint256 public constant MARS= 0;
+    uint256 public constant CADBURY = 1;
+    uint256 public constant LINDT = 2;
+    uint256 public constant GODIVA = 3;
+    uint256 public constant BOUNTY = 4;
+
+    constructor() public ERC1155("https://chocolates.example/api/item/{id}.json") {
+        _mint(msg.sender, MARS, 10**18, "");
+        _mint(msg.sender, CADBURY, 10**27, "");
+        _mint(msg.sender, LINDT, 1, "");
+        _mint(msg.sender, GODIVA, 10**9, "");
+        _mint(msg.sender, BOUNTY, 10**9, "");
+    }
+}
